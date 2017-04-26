@@ -35,6 +35,10 @@ module.exports = {
     getCommands: function() {
         return botCommands;
     },
+	
+	getCommandPrefix: function() {
+		return config.chat.commandPrefix;
+	},
     
     handleCommand: function(scope, message, command, args) {
 		//Check if this is an allowed channel...

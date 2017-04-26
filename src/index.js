@@ -76,10 +76,9 @@ discordClient.on('ready', () => {
 });
 
 discordClient.on('message', message => {
-	if(!config.chat || !config.chat.commandPrefix) return;
-	if(message.content.startsWith(config.chat.commandPrefix)) {
+	if(message.content.startsWith(commands.getCommandPrefix())) {
 		//Got a command, send it to the cmd manager
-		let m = message.content.substring(config.chat.commandPrefix.length);//Remove the command prefix
+		let m = message.content.substring(commands.getCommandPrefix().length);//Remove the command prefix
 		if(m.length < 1) return;//Not a valid cmd
 		let marr = m.split(' ');//Split by spaces
 		let cmd = marr[0];
