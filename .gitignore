@@ -85,4 +85,4 @@ $RECYCLE.BIN/
 *.lnk
 
 #DomBot stuff
-config/
+config/config.json

@@ -1,0 +1,15 @@
+{
+	"credentials": {
+		"client": "Y O U R    C L I E N T   I D",
+		"token": "Y O U R    U S E R    T O K E N"
+	},
+	"chat": {
+		"commandPrefix": "!",
+		"textChannels": [
+			190334542672953344
+		],
+		"voiceChannels": [
+			166518467984359434
+		]
+	}
+}
