@@ -39,21 +39,13 @@ module.exports = {
 	getCommandPrefix: function() {
 		return config.chat.commandPrefix;
 	},
-    
-    handleCommand: function(scope, message, command, args) {
-		//Check if this is an allowed channel...
-		if(!config || !config.chat || !config.chat.textChannels) return;
-		let allowedChannel = false;
-		for(let i = 0; i < config.chat.textChannels.length; i++) {
-			if(config.chat.textChannels[i] != scope.channel.id) continue;
-			allowedChannel = true;
-			break;
-		}
-		if(!allowedChannel) return;
-		
+	
+	getTab: function() {
+		return "    ";
+	},
+	
+	findCommand: function(command) {
         let cmdLower = command.toLowerCase();
-        
-        //First try to find the command that matches this label
         let tryCommand = undefined;
         
         for(var i = 0; i < botCommands.length; i++) {
@@ -73,8 +65,29 @@ module.exports = {
                 break;
             }
         }
+		return tryCommand;
+	},
+	
+	prettyCommand: function(command, args) {
+		return this.getCommandPrefix() + command + (args.length > 0 ? " " : "") + args.join(' ');
+	},
+    
+    handleCommand: function(scope, message, command, args) {
+		//Check if this is an allowed channel...
+		if(!config || !config.chat || !config.chat.textChannels) return;
+		let allowedChannel = false;
+		for(let i = 0; i < config.chat.textChannels.length; i++) {
+			if(config.chat.textChannels[i] != scope.channel.id) continue;
+			allowedChannel = true;
+			break;
+		}
+		if(!allowedChannel) return;
         
+        //First try to find the command that matches this label
+        let tryCommand = this.findCommand(command);
         if(!tryCommand) return;
+		
+		console.log("$"+scope.guild.name+"#"+scope.channel.name+"@"+scope.member.displayName+" "+this.prettyCommand(command, args));
         
         //Update Scope
         let response = tryCommand.command(command, args, scope);
@@ -82,7 +95,7 @@ module.exports = {
 		if(typeof response === typeof "" || response.type == "message") {//Response is a string
 			if(response.length < 1) return;
 			let message = response;
-			if(response.type == "message") message = response.message;
+			if(response.type == "message") message = response.message;//If response is an object it's response.message we need to use.
 			scope.channel.sendMessage(message);
 		} else {
 			if(!response.message || response.message.length < 1) return;

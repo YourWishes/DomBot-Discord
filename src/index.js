@@ -6,6 +6,7 @@ const Discord = require('discord.js');
 const config = require('./../config/config.json');
 const commands = require('./commands/index.js');
 const music = require('./music');
+const DomBot = require('./bot/DomBot');
 
 //First we are going to get and confirm our configuration files
 if(!config || !config.credentials) {
@@ -17,35 +18,30 @@ if(!config.credentials.token) throw new Error('Missing Token ID in config.json')
 
 //Configuration is ok, now make the bot
 const discordClient = new Discord.Client();
-
 commands.loadCommands();
 music.setup();
 
+
+/*
+ *
+ * DISCORD API EVENTS
+ *
+ */
 discordClient.on('ready', () => {
 	console.log('Discord bot ready.');
-	let message = "===Joining servers===\n";
+	//Join the Guilds
+	let message = "\n===Joining servers===\n";
 	discordClient.guilds.forEach(function(guild) {
+		message += " - " + guild.name + "\n";//Append our friendly log
+		
+		//Make our Guild object (sorta injected data)
 		if(!guild.dombot) {
-			guild.dombot = {
-				connecting: false,
-				volume: 0.5
-			};
-			if(config.chat && config.chat.volume) guild.dombot.volume = config.chat.volume;
-			guild.dombot.guild = guild;
-			guild.getSongQueue = function() {
-				let queue = [];
-				music.getSongQueue().forEach(function(songRequest) {
-					if(!songRequest || !songRequest.message || !songRequest.message.guild || !songRequest.message.guild.id) return;
-					if(songRequest.message.guild.id != this.id) return;
-					queue.push(songRequest);
-				});
-				return queue;
-			}
+			let dombot = new DomBot(guild);
 		}
 		
-		message += " - " + guild.name + "\n";
-		
+		//Iterate over the channels
 		guild.channels.forEach(function(channel) {
+			//If it's an available voice channel...
 			if(
 				!guild.dombot.connecting &&
 				!guild.dombot.connection &&
@@ -53,7 +49,7 @@ discordClient.on('ready', () => {
 				channel.joinable &&
 				channel.speakable
 			) {
-				//check if this is one of the channels to join
+				//Confirm whether this is one of the channels in the config we want to join
 				let found = false;
 				for(let i = 0; i < config.chat.voiceChannels.length; i++) {
 					if(config.chat.voiceChannels[i] != channel.id) continue;
@@ -62,20 +58,22 @@ discordClient.on('ready', () => {
 				}
 				if(!found) return;
 				
+				//Start Connecting, make it thread safe(ish)
 				guild.dombot.connecting = true;
 				channel.join().then(connection => {
-					guild.dombot.connecting = false;
-					guild.dombot.connection = connection;
-					console.log("Joined channel " + connection.channel.name);
+					//Connected successfully!
+					connection.channel.guild.dombot.onChannelConnect(connection);
 				});
 			}
 		});
 	});
-	discordClient.user.setGame("with underage girls.");
+	//Print the log
 	console.log(message);
 });
 
+//Listen for Discord messages
 discordClient.on('message', message => {
+	//Is this a command? We need to pass it to the command manager if it is
 	if(message.content.startsWith(commands.getCommandPrefix())) {
 		//Got a command, send it to the cmd manager
 		let m = message.content.substring(commands.getCommandPrefix().length);//Remove the command prefix
@@ -90,6 +88,8 @@ discordClient.on('message', message => {
 		commands.handleCommand(message, message.content.substring(1), cmd, args);
 	}
 });
+
+
 
 //Connect the bot (main thread)
 discordClient.login(config.credentials.token);

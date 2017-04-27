@@ -17,19 +17,24 @@ module.exports = class SongRequest {
 	queue() {
 		try {
 			let funcSucc = function(req,d) {
+				if(d.livestream && d.livestream == 1) {
+					req.message.reply("Sorry, but livestream's cannot be played (yet) :confounded:");
+					return;
+				}
+				
 				req.data = d;
 				req.message.reply(d.title + " has been queued.");
 				music.addSongRequest(req);
 			}
 			let funcBad = function(req,d,d1) {
-				let message = "An error occured! :S sorry about that, your song has been skipped.\n```javascript\n";
+				let message = "An error occured! :confounded: sorry about that, your song has been skipped.\n```javascript\n";
 				message += d;
 				message += "```";
 				req.message.reply(message);
 			}
 			let req = ytdl.getInfo(this.getURL(), {filter : 'audioonly'}).then(funcSucc.bind(null, this)).catch(funcBad.bind(null, this));
 		} catch(e) {
-			let message = "An error occured! :S sorry about that, your song has been skipped.\n```javascript\n";
+			let message = "An error occured! :confounded: sorry about that, your song has been skipped.\n```javascript\n";
 			message += e;
 			message += "```";
 			this.message.reply(message);
@@ -92,7 +97,7 @@ module.exports = class SongRequest {
 				this.songRequest.onStart();
 			});
 		} catch(e) {
-			let message = "An error occured! :S sorry about that, your song has been skipped.\n```javascript\n";
+			let message = "An error occured! :confounded: sorry about that, your song has been skipped.\n```javascript\n";
 			message += e;
 			message += "```";
 			this.message.reply(message);

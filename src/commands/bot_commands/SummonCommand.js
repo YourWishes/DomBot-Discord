@@ -17,9 +17,7 @@ module.exports = {
 		}
 		
 		scope.member.voiceChannel.join().then(connection => {
-			connection.channel.guild.dombot.connecting = false;
-			connection.channel.guild.dombot.connection = connection;
-			console.log("Joined channel " + connection.channel.name);
+			connection.channel.guild.dombot.onChannelConnect(connection);
 		});
     }
 };

@@ -4,14 +4,14 @@ module.exports = {
     command: function(label, args, scope) {
 		let guild = scope.channel.guild;
 		
-		let queue = guild.getSongQueue();
+		let queue = guild.dombot.getSongQueue();
 		
 		let count = queue.length;
 		if(guild.dombot.playing && guild.dombot.playing.isPlaying()) count ++;
 		
 		let message = "";
 		if(count > 0) {
-			message = "There "(count >1?"are ":"is ") + count + " song"+(count>1?"s":"")+" in the list.\n";
+			message = "There "+(count >1?"are ":"is ")+count+" song"+(count>1?"s":"")+" in the list.\n";
 			if(guild.dombot.playing && guild.dombot.playing.isPlaying()) {
 				message += "Currently playing " + guild.dombot.playing.data.title;
 			}
