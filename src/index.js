@@ -89,7 +89,5 @@ discordClient.on('message', message => {
 	}
 });
 
-
-
 //Connect the bot (main thread)
 discordClient.login(config.credentials.token);

@@ -25,9 +25,7 @@ module.exports = {
 		if(vol < 0 || vol > 100) {
 			return {type:"reply", message:"Volume must be a number between 0 and 100"};
 		}
-		dombot.volume = vol/100.0;
-		
-		if(dombot.playing) dombot.playing.setVolume(dombot.volume);
+		dombot.setVolume(vol/100.0);
 		
 		return {type:"reply",message:"Volume set to `" + parseInt(dombot.volume*100.0) + "%`"};
     }

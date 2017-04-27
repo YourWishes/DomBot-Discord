@@ -20,6 +20,7 @@ module.exports = {
 				message += commands.getCommandPrefix() + cmds[i].label + (i < cmds.length-1 ? ", " : "");
 			}
 			message += "```";
+			message += "\nFor additional help with the bot visit the github page: <https://github.com/YourWishes/DomBot-Discord>";
 			return {type: "reply", message: message};
 		}
 		
