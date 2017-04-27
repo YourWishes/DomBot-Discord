@@ -32,7 +32,7 @@ module.exports = {
 		let message = "Help available for " + commands.getCommandPrefix() + helpCommand.label + ": \n```";
 		let msgArgs = "";
 		if(helpCommand.description) message += helpCommand.description + "\n";
-		message += "Usage: " + commands.getCommandPrefix() + label;
+		message += "Usage: " + commands.getCommandPrefix() + cmdFind;
 		if(helpCommand.args && helpCommand.args.length > 0) {
 			message += " ";
 			msgArgs += "Parameters: \n";

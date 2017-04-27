@@ -1,6 +1,14 @@
 module.exports = {
     label: "volume",
     aliases: ["vol", "setvolume", "setvol"],
+	description: "Allows you to set, or get, the volume of playing music.",
+	args: [
+		{
+			name: "level",
+			optional: true,
+			description: "The level (between 0 and 100) the volume should be set to."
+		}
+	],
     command: function(label, args, scope) {
 		let guild = scope.channel.guild;
 		let dombot = guild.dombot;

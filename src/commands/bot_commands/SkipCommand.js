@@ -4,6 +4,7 @@ const utils = require('./../../utils');
 module.exports = {
     label: "skip",
     aliases: [],
+	description: "Skip the currently playing song (if any)",
     command: function(label, args, scope) {
 		let guild = scope.channel.guild;
 		if(!guild.dombot.playing || !guild.dombot.playing.isPlaying()) {

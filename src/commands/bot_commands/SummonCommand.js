@@ -4,6 +4,7 @@ const utils = require('./../../utils');
 module.exports = {
     label: "summon",
     aliases: ["join"],
+	description: "Makes the bot join the channel that you are in.",
     command: function(label, args, scope) {
 		if(!scope.member) return;
 		if(!scope.member.voiceChannel) {

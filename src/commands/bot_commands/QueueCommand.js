@@ -1,6 +1,7 @@
 module.exports = {
     label: "queue",
     aliases: ["q", "songs", "list"],
+	description: "Displays the list of currently playing songs.",
     command: function(label, args, scope) {
 		let guild = scope.channel.guild;
 		
