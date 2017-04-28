@@ -19,7 +19,7 @@ module.exports = {
 			for(var i = 0; i < cmds.length; i++) {
 				message += commands.getCommandPrefix() + cmds[i].label + (i < cmds.length-1 ? ", " : "");
 			}
-			message += "```";
+			message += "```Type `!help` followed by the name of a command, e.g. `!help play` to get help for a specific command.\n";
 			message += "\nFor additional help with the bot visit the github page: <https://github.com/YourWishes/DomBot-Discord>";
 			return {type: "reply", message: message};
 		}

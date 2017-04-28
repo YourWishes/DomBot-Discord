@@ -98,6 +98,10 @@ module.exports = {
 			if(response.type == "message") message = response.message;//If response is an object it's response.message we need to use.
 			scope.channel.sendMessage(message);
 		} else {
+			if(response.type == "permission") {
+				scope.reply("Sorry you don't have permission to do this. :worried:");
+				return;
+			}
 			if(!response.message || response.message.length < 1) return;
 			
 			if(response.type == "reply") {

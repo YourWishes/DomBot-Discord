@@ -1,31 +1,31 @@
 {
-	"name": "dombot-discord",
-	"version": "1.0.0",
-	"description": "A multi bot for Discord servers.",
-	"main": "src/index.js",
-	"scripts": {
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/YourWishes/DomBot-Discord.git"
-	},
-	"keywords": [
-		"dombot",
-		"dom",
-		"bot",
-		"discord",
-		"server",
-		"music"
-	],
-	"author": "Dominic Masters",
-	"license": "Apache-2.0",
-	"bugs": {
-		"url": "https://github.com/YourWishes/DomBot-Discord/issues"
-	},
-	"dependencies": {
-		"discord.js": "^=11.0.0",
-		"node-opus": "^0.2.6",
-		"ytdl-core": "^0.7.22"
-	},
-	"homepage": "https://github.com/YourWishes/DomBot-Discord#readme"
+  "name": "dombot-discord",
+  "version": "1.0.0",
+  "description": "A multi bot for Discord servers.",
+  "main": "src/index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YourWishes/DomBot-Discord.git"
+  },
+  "keywords": [
+    "dombot",
+    "dom",
+    "bot",
+    "discord",
+    "server",
+    "music"
+  ],
+  "author": "Dominic Masters",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/YourWishes/DomBot-Discord/issues"
+  },
+  "dependencies": {
+    "discord.js": "^=11.0.0",
+    "node-opus": "^0.2.6",
+    "youtube-api": "^2.0.8",
+    "ytdl-core": "^0.7.22"
+  },
+  "homepage": "https://github.com/YourWishes/DomBot-Discord#readme"
 }

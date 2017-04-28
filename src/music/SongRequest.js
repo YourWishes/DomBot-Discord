@@ -16,7 +16,17 @@ module.exports = class SongRequest {
 	
 	queue() {
 		try {
-			let funcSucc = function(req,d) {
+			//SUCC (Success)
+			let funcSucc = function(req,err,d) {
+				//Normal function is [error,info] but we prepend the req object for self referencing.
+				if(!d || err) {
+					let message = "An error occured! :confounded: sorry about that, your song has been skipped.\n```javascript\n";
+					message += err;
+					message += "```";
+					req.message.reply(message);
+					return;
+				}
+				
 				if(d.livestream && d.livestream == 1) {
 					req.message.reply("Sorry, but livestream's cannot be played (yet) :confounded:");
 					return;
@@ -26,18 +36,14 @@ module.exports = class SongRequest {
 				req.message.reply(d.title + " has been queued.");
 				music.addSongRequest(req);
 			}
-			let funcBad = function(req,d,d1) {
-				let message = "An error occured! :confounded: sorry about that, your song has been skipped.\n```javascript\n";
-				message += d;
-				message += "```";
-				req.message.reply(message);
-			}
-			let req = ytdl.getInfo(this.getURL(), {filter : 'audioonly'}).then(funcSucc.bind(null, this)).catch(funcBad.bind(null, this));
+			ytdl.getInfo(this.getURL(), {filter : 'audioonly'}, funcSucc.bind(null, this));//Bind the SongRequest object to the function.
+			
 		} catch(e) {
 			let message = "An error occured! :confounded: sorry about that, your song has been skipped.\n```javascript\n";
 			message += e;
 			message += "```";
 			this.message.reply(message);
+			console.log(e);
 			return;
 		}
 	}
@@ -83,7 +89,7 @@ module.exports = class SongRequest {
 			let dombot = this.message.guild.dombot;
 			dombot.playing = this;
 			
-			this.stream = ytdl(this.getURL(), {filter : 'audioonly'});
+			this.stream = ytdl.downloadFromInfo(this.data, {filter : 'audioonly'});
 			this.dispatcher = dombot.connection.playStream(this.stream, {
 				volume: dombot.volume*0.25
 			});
@@ -107,7 +113,7 @@ module.exports = class SongRequest {
 	
 	//Events
 	onStart() {
-		this.message.reply("Your song \"" + this.data.title + "\" is now playing!");
+		this.message.reply("Your song \"" + this.data.title + "\" is now playing! :musical_note:");
 		console.log("Playing " + this.data.title + " in Discord " + this.message.guild.name + " - " + this.message.guild.dombot.connection.channel.name);
 		this.unqueue();
 	}

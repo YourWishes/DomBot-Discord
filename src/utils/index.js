@@ -114,6 +114,16 @@ module.exports = {
         };
         return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
     },
+	
+	rerequire: function(module) {
+		//Simply requires, or if already required, clears the cache then requires again the supplied module
+		//Keep in mind that this will be relative to this file (./utils/index)
+		let res = require.resolve(module);
+		if(require.cache[res]) {
+			delete require.cache[res];
+		}
+		return require(module);
+	},
     
     rimraf: rimraf
 }

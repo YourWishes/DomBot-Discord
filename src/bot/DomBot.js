@@ -1,8 +1,14 @@
 'use strict'
+const Discord = require('discord.js');
 
 const config = require('./../../config/config.json');
 const music = require('./../music');
 
+/*
+ *	I need to clear up the difference between DomBot and DomBotClient
+ *	You can think of DomBot (this class) as an individual DomBot for each Guild
+ * (Discord Server) that DomBotClient (The application itself) is connected to
+ */
 module.exports = class DomBot {
 	constructor(guild) {
 		guild.dombot = this;
@@ -11,6 +17,34 @@ module.exports = class DomBot {
 		this.connecting = false;
 		this.volume = 0.5;
 		if(config.chat && config.chat.volume) this.volume = config.chat.volume;
+	
+		//Iterate over the channels
+		guild.channels.forEach(function(channel) {
+			//If it's an available voice channel...
+			if(
+				!guild.dombot.connecting &&
+				!guild.dombot.connection &&
+				channel instanceof Discord.VoiceChannel &&
+				channel.joinable &&
+				channel.speakable
+			) {
+				//Confirm whether this is one of the channels in the config we want to join
+				let found = false;
+				for(let i = 0; i < config.chat.voiceChannels.length; i++) {
+					if(config.chat.voiceChannels[i] != channel.id) continue;
+					found = true;
+					break;
+				}
+				if(!found) return;
+				
+				//Start Connecting, make it thread safe(ish)
+				guild.dombot.connecting = true;
+				channel.join().then(connection => {
+					//Connected successfully!
+					connection.channel.guild.dombot.onChannelConnect(connection);
+				});
+			}
+		});
 	}
 	
 	getDiscordClient() {
