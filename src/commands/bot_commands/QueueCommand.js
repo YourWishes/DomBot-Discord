@@ -14,7 +14,7 @@ module.exports = {
 		if(count > 0) {
 			message = "There "+(count >1?"are ":"is ")+count+" song"+(count>1?"s":"")+" in the list.\n";
 			if(guild.dombot.playing && guild.dombot.playing.isPlaying()) {
-				message += "Currently playing " + guild.dombot.playing.data.title;
+				message += "Currently playing " + guild.dombot.playing.data.title + "\n";
 			}
 			for(var i = 0; i < queue.length; i++) {
 				if(!queue[i].data.title) continue;

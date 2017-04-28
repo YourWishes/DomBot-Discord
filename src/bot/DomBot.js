@@ -61,9 +61,21 @@ module.exports = class DomBot {
 			let songRequest = music.getSongQueue()[i];
 			if(!songRequest || !songRequest.message || !songRequest.message.guild || !songRequest.message.guild.id) return;
 			if(songRequest.message.guild.id != this.guild.id) return;
+			songRequest.index = i;
 			queue.push(songRequest);
 		}
 		return queue;
+	}
+	
+	shuffleQueue() {
+		let ogQueue = this.getSongQueue();//Get the current queue order
+		let queue = ogQueue.clone().shuffle();//Shuffle the queue order to a new array
+		for(var i = 0; i < queue.length; i++) {
+			//Iterate over the shuffled array
+			//Set the song in the master queue at the original song's index to be the new song.
+			//...I shoulda worded that better but that's the best I can do
+			music.getSongQueue()[ogQueue[i].index] = queue[i];
+		}
 	}
 	
 	setVolume(vol) {

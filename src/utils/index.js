@@ -44,6 +44,22 @@ if(typeof Array.prototype.clear === typeof undefined) {
     }
 }
 
+if(typeof Array.prototype.shuffle === typeof undefined) {
+    Array.prototype.shuffle = function () {
+		for (let i = this.length; i; i--) {
+			let j = Math.floor(Math.random() * i);
+			[this[i - 1], this[j]] = [this[j], this[i - 1]];
+		}
+		return this;
+	}
+}
+
+if(typeof Array.prototype.clone === typeof undefined) {
+    Array.prototype.clone = function () {
+		return this.slice();
+	}
+}
+
 function rimraf(path) {
     if(fs.existsSync(path) ) {
         fs.readdirSync(path).forEach(function(file,index){
