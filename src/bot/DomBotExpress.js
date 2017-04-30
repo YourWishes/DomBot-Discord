@@ -8,8 +8,16 @@ module.exports = class DomBotExpress {
 		this.client = client;//Parent DomBotClient
 		let ip = "localhost";
 		let port = 9090;
-		if(!config.server.ip) console.warn("Missing IP in server on configuration, assuming "+ip);
-		if(!config.server.port) console.warn("Missing Port in server on configuration, assuming "+port);
+		if(!config.server.ip) {
+			console.warn("Missing IP in server on configuration, assuming "+ip);
+		} else {
+			ip = config.server.ip;
+		}
+		if(!config.server.port) {
+			console.warn("Missing Port in server on configuration, assuming "+port);
+		} else {
+			port = config.server.port;
+		}
 		
 		let funcConnected = function(domBotExpress) {domBotExpress.onServerReady();}
 		this.express = express();
