@@ -8,7 +8,7 @@ module.exports = {
 		if(domBotExpress.client.ytAuthURL) {
 			let ytOauth = domBotExpress.client.ytOauth;
 			if(ytOauth.isDomBotReady()) {
-				x += 'YouTube has been authorized.<br />';
+				x += '<a href="'+domBotExpress.client.ytAuthURL+'" target="_blank">YouTube has been authorized.<br /></a>';
 			} else {
 				console.log(ytOauth);
 				x += '<a href="'+domBotExpress.client.ytAuthURL+'" target="_blank">Authorize YouTube API</a><br />';

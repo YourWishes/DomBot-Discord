@@ -5,14 +5,43 @@ const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 const fs = require('fs');
+const DomBot = require('./../bot/DomBot');
 
 const songsDir = './songs/';
 
 module.exports = class SongRequest {
-    constructor(youtube_id, message) {
+    constructor(youtube_id, message_or_dombot, member_or_null) {
 		this.id = youtube_id;
-		this.message = message;
+		if(message_or_dombot instanceof DomBot) {
+			this.dombot = message_or_dombot;
+		} else {
+			this.message = message_or_dombot;
+		}
+		
+		if(member_or_null) this.member = member_or_null;
     }
+	
+	sendReply(response) {
+		//Sends a reply if this has a message, if it's a DomBot sends a "broadcast"
+		if(this.message) {
+			this.message.reply(response);
+		} else {
+			if(this.member) {
+				response = "@"+this.member.displayName + ", " + response;
+			}
+			this.dombot.sendMessage(response);
+		}
+	}
+	
+	getDombot() {
+		if(this.dombot) return dombot;
+		return this.message.guild.dombot;
+	}
+	
+	getGuild() {
+		if(this.dombot) return dombot.guild;
+		return this.message.guild;
+	}
 	
 	queue() {
 		try {
@@ -23,17 +52,17 @@ module.exports = class SongRequest {
 					let message = "An error occured! :confounded: sorry about that, your song has been skipped.\n```javascript\n";
 					message += err;
 					message += "```";
-					req.message.reply(message);
+					req.sendReply(message);
 					return;
 				}
 				
 				if(d.livestream && d.livestream == 1) {
-					req.message.reply("Sorry, but livestream's cannot be played (yet) :confounded:");
+					req.sendReply("Sorry, but livestream's cannot be played (yet) :confounded:");
 					return;
 				}
 				
 				req.data = d;
-				req.message.reply(d.title + " has been queued.");
+				req.sendReply(d.title + " has been queued.");
 				music.addSongRequest(req);
 			}
 			ytdl.getInfo(this.getURL(), {filter : 'audioonly'}, funcSucc.bind(null, this));//Bind the SongRequest object to the function.
@@ -42,7 +71,7 @@ module.exports = class SongRequest {
 			let message = "An error occured! :confounded: sorry about that, your song has been skipped.\n```javascript\n";
 			message += e;
 			message += "```";
-			this.message.reply(message);
+			this.sendReply(message);
 			console.log(e);
 			return;
 		}
@@ -68,11 +97,11 @@ module.exports = class SongRequest {
 	}
 	
 	tick() {
-		if(!this.message.guild || !this.message.guild.dombot) {
+		if(!this.getGuild() || !this.getDombot()) {
 			this.unqueue();
 			return;
 		}
-		if(this.message.guild.dombot.playing && this.message.guild.dombot.playing.isPlaying()) return;
+		if(this.getDombot().playing && this.getDombot().playing.isPlaying()) return;
 		this.play();
 	}
 	
@@ -81,12 +110,12 @@ module.exports = class SongRequest {
 	}
 	
 	play() {
-		if(!this.message.guild || !this.message.guild.dombot || !this.message.guild.dombot.connection) return;
+		if(!this.getGuild() || !this.getDombot() || !this.getDombot().connection) return;
 		this.playing = true;
 		this.unqueue();
 		
 		try {
-			let dombot = this.message.guild.dombot;
+			let dombot = this.getDombot();
 			dombot.playing = this;
 			
 			this.stream = ytdl.downloadFromInfo(this.data, {filter : 'audioonly'});
@@ -106,15 +135,15 @@ module.exports = class SongRequest {
 			let message = "An error occured! :confounded: sorry about that, your song has been skipped.\n```javascript\n";
 			message += e;
 			message += "```";
-			this.message.reply(message);
+			this.sendReply(message);
 			return;
 		}
 	}
 	
 	//Events
 	onStart() {
-		this.message.reply("Your song \"" + this.data.title + "\" is now playing! :musical_note:");
-		console.log("Playing " + this.data.title + " in Discord " + this.message.guild.name + " - " + this.message.guild.dombot.connection.channel.name);
+		this.sendReply("Your song \"" + this.data.title + "\" is now playing! :musical_note:");
+		console.log("Playing " + this.data.title + " in Discord " + this.getGuild().name + " - " + this.getDombot().connection.channel.name);
 		this.unqueue();
 	}
 	

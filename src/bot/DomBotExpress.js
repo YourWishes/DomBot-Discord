@@ -21,7 +21,7 @@ module.exports = class DomBotExpress {
 		
 		let funcConnected = function(domBotExpress) {domBotExpress.onServerReady();}
 		this.express = express();
-		let o = this.express.listen(port, funcConnected.bind(null, this));
+		this.server = this.express.listen(port, funcConnected.bind(null, this));
 	}
 	
 	getHeader(title) {
@@ -67,7 +67,7 @@ module.exports = class DomBotExpress {
 	}
 	
 	disconnect() {
-		this.express.close();
+		if(this.server) this.server.close();
 	}
 	
 	onPage(page, res, req) {

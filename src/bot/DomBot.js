@@ -215,7 +215,6 @@ module.exports = class DomBot {
 		
 		let recData = function(dombot, user, pcmStream, recognize, command, data) {
 			if(data.results && typeof data.results === typeof "") {
-				console.log(user.displayName + ": " + data.results);
 				dombot.onTextToSpeech(user, data.results, data);
 			}
 		}

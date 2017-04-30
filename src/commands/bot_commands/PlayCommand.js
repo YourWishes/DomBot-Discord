@@ -50,6 +50,8 @@ module.exports = {
 				
 				let searchFunc = function(scope, err, data) {
 					if(err) {
+						console.log(err);
+						console.log(data);
 						scope.reply("Uh-oh! :confounded:\nAn error occured when trying to find that song, your song hasn't been queued.```"+err+"```");
 						return;
 					}
