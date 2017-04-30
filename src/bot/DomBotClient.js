@@ -1,10 +1,10 @@
 const Discord = require('discord.js');
-const Youtube = require("youtube-api")
 
 const utils = require('./../utils');
 const DomBot = require('./DomBot');
 const commands = require('./../commands/index.js');
 const music = require('./../music');
+const fs = require('fs');
 
 let config = utils.rerequire('./../../config/config.json');
 
@@ -28,7 +28,17 @@ if(typeof Discord.GuildMember.prototype.isDomBotAdmin !== "function") {
 module.exports = class DomBotClient {
 	//Throws error for configuration invalid-ness
 	constructor(guild) {
-		//Configuration ok (enough), Create our Discord Client
+		//Check config, we NEED discord so this is important
+		if(!config || !config.tokens) throw new Error("Configuration is missing tokens");
+		if(!config.tokens.discord) throw new Error("Configuration is missing Discord tokens");
+		
+		//We are going to make an express server (optional)
+		if(config.server) {
+			let DomBotExpress = require('./DomBotExpress');
+			this.express = new DomBotExpress(this, config);
+		}
+		
+		//Create our discord client
 		this.discordClient = new Discord.Client();
 		this.discordClient.dombot = this;//Inject some data
 		
@@ -52,18 +62,54 @@ module.exports = class DomBotClient {
 		
 		let odf = function(dombot,e) {dombot.onDisconnect(e);}
 		this.discordClient.on('disconnect', odf.bind(null, this));
+		
+		//Now we are going to setup the YouTube API (Optional)
+		if(config.tokens.youtube) {
+			if(!config.tokens.youtube.id) throw new Error("Missing YouTube Client ID in the configuration.");
+			if(!config.tokens.youtube.secret) throw new Error("Missing YouTube Client Secret in the configuration.");
+			if(!config.tokens.youtube.redirect) throw new Error("Missing YouTube redirect in the configuration.");
+			
+			let Youtube = require("youtube-api");
+			
+			//YouTube tokens
+			this.ytOauth = Youtube.authenticate({
+				type: "oauth"
+				, client_id: config.tokens.youtube.id
+				, client_secret: config.tokens.youtube.secret
+				, redirect_url: config.tokens.youtube.redirect
+			});
+			//Inject function, saves some work
+			this.ytOauth.isDomBotReady = function() {
+				return this.credentials && this.credentials['access_token'] && this.credentials['access_token'].length > 0;	
+			}
+			
+			this.ytAuthURL = this.ytOauth.generateAuthUrl({
+				access_type: "offline",
+				scope: ["https://www.googleapis.com/auth/youtube"]
+			});
+			
+			
+			if(fs.existsSync('./tokens/youtube.json')) {
+				console.log("Found existing YouTube Authorization.");
+				this.ytOauth.setCredentials(JSON.parse(fs.readFileSync('./tokens/youtube.json', 'utf8')));
+				//TODO: Validate tokens.
+			}
+		}
+		
+		
+		if(config.voice && config.voice.enable) {
+			if(!config.tokens || !config.tokens.google) throw new Error("Cannot do voice without Google tokens!");
+			if(!config.tokens.google.projectId || !config.tokens.google.keyFileName) throw new Error("Missing Project ID or Key File Name for Google tokens!");
+			
+			this.GoogleSpeech = require('@google-cloud/speech')({
+				projectId: config.tokens.google.projectId,
+				keyFilename: config.tokens.google.keyFileName
+			});
+		}
 	}
 	
 	login() {
-		//First we are going to get and confirm our configuration files
-		if(!config || !config.credentials) {
-			throw new Error('Invalid Configuration');
-		}
-
-		if(!config.credentials.client) throw new Error('Missing Client ID in config.json');
-		if(!config.credentials.token) throw new Error('Missing Token ID in config.json');
-		
-		this.discordClient.login(config.credentials.token);
+		this.discordClient.login(config.tokens.discord.token);
 	}
 	
 	onReady() {
@@ -82,6 +128,10 @@ module.exports = class DomBotClient {
 	}
 	
 	onDisconnect(e) {
+		if(this.express) {
+			this.express.disconnect();
+		}
+		
 		if(this.autorestart) {
 			config = utils.rerequire('./../../config/config.json');
 			let client = new DomBotClient();

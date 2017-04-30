@@ -14,7 +14,8 @@ module.exports = {
 	],
     command: function(label, args, scope) {
 		let guild = scope.channel.guild;
-		if(!guild.dombot.connection) {
+		let dombot = guild.dombot;
+		if(!dombot.connection) {
 			return {type: "reply", message: "Not in a voice channel."};
 		}
 		
@@ -22,7 +23,7 @@ module.exports = {
 			return {type: "reply", message: "Please enter a YouTube URL or ID"};
 		}
 		
-		let connection = guild.dombot.connection;
+		let connection = dombot.connection;
 		
 		//Alright let's try to queue the YouTube video
 		let id = args[0];
@@ -42,7 +43,40 @@ module.exports = {
 				//Will add handling here properly
 				return {type: "reply", message: "Invalid video link :thinking: I can only queue YouTube videos at the moment, sorry."};
 			}
-        }
+        } else {
+			//Maybe a video id, or maybe something else? (like a search)
+			if(dombot.getDomBotClient().ytOauth && dombot.getDomBotClient().ytOauth.isDomBotReady()) {
+				let Youtube = require("youtube-api");
+				
+				let searchFunc = function(scope, err, data) {
+					if(err) {
+						scope.reply("Uh-oh! :confounded:\nAn error occured when trying to find that song, your song hasn't been queued.```"+err+"```");
+						return;
+					}
+					
+					let valid = data && data.items && typeof data.items === typeof [] && data.items.length > 0 && data.items[0].id && data.items[0].id.videoId;
+					if(!valid) {
+						scope.reply("Couldn't find that song :thinking: maybe try another song.");
+						return;
+					}
+					
+					let id = data.items[0].id.videoId;
+					let request = new SongRequest(id, scope);
+					request.queue();
+				}
+				
+				Youtube.search.list({
+					q: args.join(' '),
+					part: 'snippet',
+					maxResults:1,
+					type: 'video',
+					
+				},searchFunc.bind(null, scope));
+				
+				console.log("Searching YouTube");
+			}
+			return;
+		}
 		
 		let request = new SongRequest(id, scope);
 		request.queue();

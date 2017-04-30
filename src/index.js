@@ -3,6 +3,10 @@
 //Imports
 const DomBotClient = require('./bot/DomBotClient');
 
-let client = new DomBotClient();
-client.autorestart = true;
-client.login();
+try {
+	let client = new DomBotClient();
+	client.autorestart = true;
+	client.login();
+} catch(e) {
+	console.log(e);
+}

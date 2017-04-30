@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 
 const config = require('./../../config/config.json');
 const music = require('./../music');
+const ffmpeg = require('fluent-ffmpeg');
 
 /*
  *	I need to clear up the difference between DomBot and DomBotClient
@@ -54,6 +55,8 @@ module.exports = class DomBot {
 	getMember() {
 		return this.guild.member(this.getDiscordClient().user);
 	}
+	
+	getDomBotClient() {return this.getDiscordClient().dombot;}
 	
 	getSongQueue() {//Try and cache this result when you call this function
 		let queue = [];
@@ -145,8 +148,95 @@ module.exports = class DomBot {
 		});
 		
 		connection.on('debug', function(e) {
-			console.log(e);
+			//console.log(e);
 		});
+		
+		//For DomBot Audio Recognition (HIGHLY EXPERIMENTAL)
+		if(this.getDomBotClient().GoogleSpeech) {
+			this.connectionReceiver = connection.createReceiver();
+			this.connectionReceiver.on('warn', function() {
+				console.log("Reciever error");
+			});
+			
+			//Alright we have made a voice reciever! Now we need to start spying
+			//on clients.
+			let members = connection.channel.members.array();
+			for(var i = 0; i < members.length; i++) {
+				this.createVoiceThing(members[i]);
+			}
+		}
+	}
+	
+	createVoiceThing(user) {
+		if(!user || !user.voiceChannel) return;
+		//Make sure we aren't making one for ourself...
+		if(user.id === this.getMember().id) return;
+		
+		console.log("Making new voice thing for user: " + user.displayName);
+		let pcmStream = this.connectionReceiver.createPCMStream(user);//So this is the stream
+		
+		//I'm going to make some "probably's" here, just the idea of stuff he may know
+		let probably = [
+			"dombot",
+			"dom",
+			"discord",//Cuz.. Discord
+			"him",//Incase they mean the bot, he is a guy after all :^)
+			"bot",
+			"diva",
+			"may"
+		];
+		
+		//Config used for google's speech API
+		const request = {
+			config: {
+				encoding: "FLAC",
+				sampleRateHertz: 48000,
+				languageCode: "en-AU",
+				verbose: true,
+				phrases:probably
+			},
+			interimResults: false // If you want interim results, set this to true
+		};
+		
+		//Make an FFMPEG Command, we take in the Discord.JS Linear PCM 32-bit 48khz audio stream (dual channel)
+		//And convert to the above format.
+		
+		//First, here are the handlers, we bind some stuff as well
+		let ffmpegError = function(dombot, user, pcmStream, recognize, command, error) {
+			try {pcmStream.close();} catch(e) {}//Force close the stream, safe
+			try {dombot.createVoiceThing(user);} catch(e) {}//This may StackOverflow, will try threading
+			console.log("oh no, an error occured!");
+			console.log(e);
+		}
+		
+		let ffmpegEnd = function(dombot, user, pcmStream, recognize, command) {
+			try {dombot.createVoiceThing(user);} catch(e) {}//This may StackOverflow, will try threading later.
+		}
+		
+		let recData = function(dombot, user, pcmStream, recognize, command, data) {
+			if(data.results && typeof data.results === typeof "") {
+				console.log(user.displayName + ": " + data.results);
+				dombot.onTextToSpeech(user, data.results, data);
+			}
+		}
+		
+		let command = ffmpeg();
+		let recognize = this.getDomBotClient().GoogleSpeech.createRecognizeStream(request);
+		
+		command.input(pcmStream).fromFormat('s32le').audioFrequency(48000).audioChannels(2)
+			.toFormat('flac')
+			.audioFrequency(48000)
+			.audioChannels(1)
+			.on('error', ffmpegError.bind(null, this, user, pcmStream, recognize, command))
+			.on('end', ffmpegEnd.bind(null, this, user, pcmStream, recognize, command))
+			.pipe(recognize).on('data', recData.bind(null, this, user, pcmStream, recognize, command)).on('error', function(e) {
+				console.log("Error");
+				console.log(e);
+			});
+	}
+	
+	onTextToSpeech(user, message, data) {
+		console.log(user.displayName + ": " + message);
 	}
 	
 	onConnectionError(connection, error) {

@@ -22,10 +22,13 @@
     "url": "https://github.com/YourWishes/DomBot-Discord/issues"
   },
   "dependencies": {
+    "@google-cloud/speech": "^0.9.1",
     "discord.js": "^=11.0.0",
     "node-opus": "^0.2.6",
     "youtube-api": "^2.0.8",
-    "ytdl-core": "^0.7.22"
+    "ytdl-core": "^0.7.22",
+	"fluent-ffmpeg": "^2.1.2",
+	"express": "^4.15.2"
   },
   "homepage": "https://github.com/YourWishes/DomBot-Discord#readme"
 }
