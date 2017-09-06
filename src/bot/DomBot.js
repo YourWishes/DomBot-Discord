@@ -62,8 +62,8 @@ module.exports = class DomBot {
 		let queue = [];
 		for(var i = 0; i < music.getSongQueue().length; i++) {
 			let songRequest = music.getSongQueue()[i];
-			if(!songRequest || !songRequest.message || !songRequest.message.guild || !songRequest.message.guild.id) return;
-			if(songRequest.message.guild.id != this.guild.id) return;
+			if(!songRequest || !songRequest.message || !songRequest.message.guild || !songRequest.message.guild.id) continue;
+			if(songRequest.message.guild.id != this.guild.id) continue;
 			songRequest.index = i;
 			queue.push(songRequest);
 		}
@@ -98,6 +98,20 @@ module.exports = class DomBot {
 		return allowedChannel;
 	}
 	
+	canHearInVoiceChannel(channel) {
+		if(channel.type != "voice") return false;
+		if(!config || !config.voice || !config.voice.enable || !this.getDomBotClient().GoogleSpeech) return false;
+		if(!config.voice.servers) return true;
+		
+		let allowedChannel = false;
+		for(let i = 0; i < config.voice.servers.length; i++) {
+			if(config.voice.servers[i] != channel.id) continue;
+			allowedChannel = true;
+			break;
+		}
+		return allowedChannel;
+	}
+	
 	getAvailableTextChannel() {
 		if(!this.guild) return;
 		if(!this.guild.channels || this.guild.channels.length < 1) return;
@@ -115,7 +129,7 @@ module.exports = class DomBot {
 	}
 	
 	reply(member, message) {
-		this.sendMessage("@"+member.displayName + ", " + message);
+		this.sendMessage(member + ", " + message);
 	}
 	
 	disconnect() {
@@ -152,7 +166,7 @@ module.exports = class DomBot {
 		});
 		
 		//For DomBot Audio Recognition (HIGHLY EXPERIMENTAL)
-		if(this.getDomBotClient().GoogleSpeech) {
+		if(this.canHearInVoiceChannel(connection.channel)) {
 			this.connectionReceiver = connection.createReceiver();
 			this.connectionReceiver.on('warn', function() {
 				console.log("Reciever error");
@@ -160,10 +174,25 @@ module.exports = class DomBot {
 			
 			//Alright we have made a voice reciever! Now we need to start spying
 			//on clients.
-			let members = connection.channel.members.array();
+			let members = this.connection.channel.members.array();
 			for(var i = 0; i < members.length; i++) {
 				this.createVoiceThing(members[i]);
 			}
+			
+			let checkThreadFunction = function(dombot) {
+				dombot.checkVoiceThings();
+			}
+			
+			this.checkThread = setInterval(checkThreadFunction.bind(null, this), 1000);//soo dirty yet soo good.
+		} else {
+		}
+	}
+	
+	checkVoiceThings() {
+		if(!this.connectionReceiver) return;
+		let members = this.connection.channel.members.array();
+		for(var i = 0; i < members.length; i++) {
+			this.createVoiceThing(members[i]);
 		}
 	}
 	
@@ -171,9 +200,12 @@ module.exports = class DomBot {
 		if(!user || !user.voiceChannel) return;
 		//Make sure we aren't making one for ourself...
 		if(user.id === this.getMember().id) return;
+		if(user.dombotVoiceThing) return;//Hopefully stops us making multiple streams?
 		
 		console.log("Making new voice thing for user: " + user.displayName);
 		let pcmStream = this.connectionReceiver.createPCMStream(user);//So this is the stream
+		user.dombotVoiceThing = pcmStream;
+		if(!user.isDomBotAdmin()) return;//Only admins can talk
 		
 		//I'm going to make some "probably's" here, just the idea of stuff he may know
 		let probably = [
@@ -191,9 +223,7 @@ module.exports = class DomBot {
 			config: {
 				encoding: "FLAC",
 				sampleRateHertz: 48000,
-				languageCode: "en-AU",
-				verbose: true,
-				phrases:probably
+				languageCode: "en-AU"
 			},
 			interimResults: false // If you want interim results, set this to true
 		};
@@ -206,7 +236,7 @@ module.exports = class DomBot {
 			try {pcmStream.close();} catch(e) {}//Force close the stream, safe
 			try {dombot.createVoiceThing(user);} catch(e) {}//This may StackOverflow, will try threading
 			console.log("oh no, an error occured!");
-			console.log(e);
+			console.log(error);
 		}
 		
 		let ffmpegEnd = function(dombot, user, pcmStream, recognize, command) {
@@ -218,6 +248,12 @@ module.exports = class DomBot {
 				dombot.onTextToSpeech(user, data.results, data);
 			}
 		}
+		
+		let pcmEnd = function(dombot, user) {
+			user.dombotVoiceThing = null;
+			dombot.checkVoiceThings();
+		}
+		pcmStream.on('end', pcmEnd.bind(null, this, user));
 		
 		let command = ffmpeg();
 		let recognize = this.getDomBotClient().GoogleSpeech.createRecognizeStream(request);
@@ -236,6 +272,7 @@ module.exports = class DomBot {
 	
 	onTextToSpeech(user, message, data) {
 		console.log(user.displayName + ": " + message);
+		require('./../ai').handleRequest(user, message, data, this);
 	}
 	
 	onConnectionError(connection, error) {

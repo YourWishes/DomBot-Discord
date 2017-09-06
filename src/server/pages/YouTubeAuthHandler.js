@@ -11,8 +11,7 @@ module.exports = {
 		if(req.query.code) {
 			let tokenFunc = function(domBotExpress, err, tokens) {
 				if (err) {
-					//console.log("Invalid tokens.")
-					//console.log(err);
+					//console.log("Invalid tokens.");
 					//yt_valid = false;
 					return;
 				}

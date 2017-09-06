@@ -5,20 +5,25 @@ const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 const fs = require('fs');
+
 const DomBot = require('./../bot/DomBot');
 
 const songsDir = './songs/';
 
 module.exports = class SongRequest {
-    constructor(youtube_id, message_or_dombot, member_or_null) {
+    constructor(youtube_id, message, dombot, dombotMember) {
 		this.id = youtube_id;
-		if(message_or_dombot instanceof DomBot) {
-			this.dombot = message_or_dombot;
-		} else {
-			this.message = message_or_dombot;
+			
+		if(message) {
+			this.message = message;
+			this.member = this.message.member;
 		}
 		
-		if(member_or_null) this.member = member_or_null;
+		if(dombot) {
+			this.dombot = dombot;
+		}
+		
+		if(dombotMember) this.member = dombotMember;
     }
 	
 	sendReply(response) {
@@ -27,19 +32,19 @@ module.exports = class SongRequest {
 			this.message.reply(response);
 		} else {
 			if(this.member) {
-				response = "@"+this.member.displayName + ", " + response;
+				this.dombot.reply(this.member, response);
 			}
 			this.dombot.sendMessage(response);
 		}
 	}
 	
 	getDombot() {
-		if(this.dombot) return dombot;
+		if(this.dombot) return this.dombot;
 		return this.message.guild.dombot;
 	}
 	
 	getGuild() {
-		if(this.dombot) return dombot.guild;
+		if(this.dombot) return this.dombot.guild;
 		return this.message.guild;
 	}
 	
@@ -93,7 +98,7 @@ module.exports = class SongRequest {
 	
 	skip() {
 		this.playing = false;
-		this.dispatcher.end();
+		if(this.dispatcher) this.dispatcher.end();
 	}
 	
 	tick() {

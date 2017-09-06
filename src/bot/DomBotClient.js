@@ -27,15 +27,19 @@ if(typeof Discord.GuildMember.prototype.isDomBotAdmin !== "function") {
 
 module.exports = class DomBotClient {
 	//Throws error for configuration invalid-ness
-	constructor(guild) {
+	constructor() {
 		//Check config, we NEED discord so this is important
 		if(!config || !config.tokens) throw new Error("Configuration is missing tokens");
 		if(!config.tokens.discord) throw new Error("Configuration is missing Discord tokens");
 		
 		//We are going to make an express server (optional)
-		if(config.server) {
+		if(config.server) {//TODO: Fix Bugs
 			let DomBotExpress = require('./DomBotExpress');
-			this.express = new DomBotExpress(this, config);
+			try {
+                this.express = new DomBotExpress(this, config);
+            } catch(e) {
+                
+            }
 		}
 		
 		//Create our discord client
@@ -84,8 +88,9 @@ module.exports = class DomBotClient {
 			}
 			
 			this.ytAuthURL = this.ytOauth.generateAuthUrl({
-				access_type: "offline",
-				scope: ["https://www.googleapis.com/auth/youtube"]
+                prompt: "consent",
+				scope: ["https://www.googleapis.com/auth/youtube"],
+				access_type: "offline"
 			});
 			
 			
@@ -128,16 +133,17 @@ module.exports = class DomBotClient {
 	}
 	
 	onDisconnect(e) {
+        console.log("onDisconnect called.");
 		if(this.express) {
 			this.express.disconnect();
 		}
 		
-		if(this.autorestart) {
+		/*if(this.autorestart) {
 			config = utils.rerequire('./../../config/config.json');
 			let client = new DomBotClient();
 			client.autorestart = this.autorestart;
-			client.login();//Not sure, this may cause a stack overflow at some point :thinking:
-		}
+			//client.login();//Not sure, this may cause a stack overflow at some point :thinking:
+		}*/
 	}
 	
 	onMessage(message) {

@@ -6,11 +6,11 @@ const path = require('path');
 const config = require('./../../config/config.json');
 
 const commandsDir = './bot_commands/';
-const botCommands = [];
+let botCommands = [];//Not Const due to commands doubling up.
 
 module.exports = {
     loadCommands: function() {
-        botCommands.clear();
+        botCommands = [];//Hopefully this fixes my doubling up commands
 
 		var dir = path.resolve(__dirname,commandsDir);
         

@@ -7,7 +7,7 @@ module.exports = class DomBotExpress {
 	constructor(client, config) {
 		this.client = client;//Parent DomBotClient
 		let ip = "localhost";
-		let port = 9090;
+		let port = 6969;
 		if(!config.server.ip) {
 			console.warn("Missing IP in server on configuration, assuming "+ip);
 		} else {
@@ -21,7 +21,11 @@ module.exports = class DomBotExpress {
 		
 		let funcConnected = function(domBotExpress) {domBotExpress.onServerReady();}
 		this.express = express();
-		this.server = this.express.listen(port, funcConnected.bind(null, this));
+		try {
+			this.server = this.express.listen(port, funcConnected.bind(null, this));
+		} catch(e) {
+			console.err(e);
+		}
 	}
 	
 	getHeader(title) {
@@ -67,7 +71,10 @@ module.exports = class DomBotExpress {
 	}
 	
 	disconnect() {
-		if(this.server) this.server.close();
+		if(this.server) {
+			this.server.close();
+			while(this.server.listening) {}
+		}
 	}
 	
 	onPage(page, res, req) {
