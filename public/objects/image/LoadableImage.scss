@@ -1,0 +1,46 @@
+/*
+ *  Loadable Image
+ *    Image that gets loaded in the background
+ *
+ *  Dependencies:
+ *
+ *  Version:
+ *    1.0.0 - 2018/07/11
+ */
+@import '~@styles/global';
+
+@keyframes o-loadable-image--load-flash {
+  from {
+    background: transparent;
+  }
+
+  50% {
+    background: #DDD;
+  }
+
+  to {
+    background: transparent;
+  }
+}
+
+.o-loadable-image {
+
+  &__image-container {
+    opacity: 1;
+    transition: all 1s $s-animation--ease-out;
+    transition-delay: 0.5s;
+  }
+
+  &.is-loading {
+    position: relative;
+
+    animation-name: o-loadable-image--load-flash;
+    animation-timing-function: linear;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+
+    .o-loadable-image__image-container {
+      opacity: 0;
+    }
+  }
+}

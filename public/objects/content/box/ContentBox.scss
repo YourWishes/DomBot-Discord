@@ -1,0 +1,21 @@
+/*
+ *  Content Box
+ *    Simple box to hold content, comes with great settings!
+ *
+ *  Dependencies:
+ *    styles/settings/colors.scss
+ *    styles/tools/_shadow.scss
+ *
+ *  Version:
+ *    1.0.0 - 2018/06/19
+ */
+@import '~@styles/global';
+$o-content-box--padding: 1em;
+
+.o-content-box {
+  position: relative;
+
+  &.is-padded {
+    padding: $o-content-box--padding;
+  }
+}

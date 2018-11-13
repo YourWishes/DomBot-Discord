@@ -1,0 +1,56 @@
+@import '~@styles/global';
+
+.o-btn {
+  position: relative;
+  box-shadow: 0px 0.6em 0.5em 0px rgba(0,0,0,0.5);
+
+  &__inner {
+    display: inline-block;
+    padding: 1em 2em;
+    transition: transform 0.1s $s-animation--ease-out;
+    transform: translateY(0);
+    border-radius: 0.5em;
+    text-decoration: none;
+
+    font-family: $s-font--stack-headings;
+    color: $s-color--body;
+    background: $s-color--secondary;
+
+    &.is-primary {
+      background: $s-color--primary;
+    }
+
+    &.is-github {
+      color: $s-color--github-compliment;
+      background: $s-color--github;
+    }
+  }
+
+  &:hover {
+    > .o-btn__inner {
+      transform: translateY(0.2em);
+    }
+  }
+
+  &:active {
+    > .o-btn__inner {
+      transform: translateY(0.4em);
+    }
+  }
+}
+
+
+.o-btn-group {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+
+  margin: -0.5em;
+  padding: 0;
+
+  .o-btn {
+    margin: 0.5em;
+  }
+}

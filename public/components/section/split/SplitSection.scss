@@ -1,0 +1,24 @@
+/*
+ *  Split Section
+ *    Split Section for displaying things side by side
+ */
+
+@import '~@styles/global';
+
+.c-split-section {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  &__split {
+    width: 100%;
+  }
+
+  @include t-media-query($s-small-up) {
+    flex-wrap: nowrap;
+
+    &__split {
+      width: 50%;
+    }
+  }
+}

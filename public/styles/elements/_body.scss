@@ -1,0 +1,15 @@
+/*
+ *  Body
+ *    Styles for the body element.
+ */
+body {
+  margin: 0;
+  padding: 0;
+
+  color: $s-color--body;
+  font-family: $s-font--stack-default;
+
+  background-image: url('~@assets/images/bg.svg');
+  background-size: cover;
+  background-position: center;
+}

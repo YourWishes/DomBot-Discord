@@ -1,0 +1,38 @@
+/*
+ *  Anchor Styles
+ *    Styles for the anchor (a) element
+ *
+ *  Version:
+ *    1.0.0 - 2018/11/13
+ */
+$o-link--nudge-amount: 0.15em;
+
+@keyframes o-link--nudge {
+  0% {
+    padding-left: 0;
+    padding-right: $o-link--nudge-amount;
+  }
+
+  50% {
+    padding-left: $o-link--nudge-amount;
+    padding-right: 0;
+  }
+
+  100% {
+    padding-left: 0;
+    padding-right: $o-link--nudge-amount;
+  }
+}
+
+a {
+  color: $s-color--link;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &.is-link {
+    animation: o-link--nudge 0.07s $s-animation--ease-out;
+  }
+}

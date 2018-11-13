@@ -1,0 +1,43 @@
+/*
+ *  Title
+ *    Title Headings
+ *
+ *  Dependencies:
+ *    styles/settings/responsive.scss
+ *    styles/tools/_responsive.scss
+ *
+ *  Version:
+ *    1.0.1 - 2018/06/05
+ */
+@import '~@styles/global';
+
+//Font Sizes will scale according to
+.o-title {
+  font-size: 1.75em;
+  margin: 0.25em 0;
+}
+
+.o-subtitle {
+  font-size: 1em;
+  margin: 0 0 0.5em 0;
+}
+
+@include t-media-query($s-small-up) {
+  .o-title {
+    font-size: 2.5em;
+  }
+
+  .o-subtitle {
+    font-size: 1.25em;
+  }
+}
+
+@include t-media-query($s-medium-up) {
+  .o-title {
+    font-size: 3em;
+  }
+
+  .o-subtitle {
+    font-size: 1.75em;
+  }
+}

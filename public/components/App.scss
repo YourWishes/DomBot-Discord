@@ -1,0 +1,30 @@
+/*
+ *  App
+ *    App styles for the app container.
+ *
+ *  Version:
+ *    1.1.0 - 2018/10/30
+ */
+@import '~@styles/global';
+
+.c-app {
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+
+  &__inner {
+    padding: 6em 1em;
+  }
+
+  @include t-media-query($s-small-up) {
+    &__inner {
+      padding: 8em 2em;
+    }
+  }
+
+  @include t-media-query($s-large-up) {
+    &__inner {
+      padding: 10em 4em;
+    }
+  }
+}
