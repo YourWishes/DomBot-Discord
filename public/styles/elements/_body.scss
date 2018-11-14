@@ -12,4 +12,8 @@ body {
   background-image: url('~@assets/images/bg.svg');
   background-size: cover;
   background-position: center;
+
+  #app {
+    overflow-x: hidden;
+  }
 }

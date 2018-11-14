@@ -16,6 +16,11 @@
     padding: 6em 1em;
   }
 
+  &__image {
+    display: block;
+    margin: 0 auto;
+  }
+
   @include t-media-query($s-small-up) {
     &__inner {
       padding: 8em 2em;
