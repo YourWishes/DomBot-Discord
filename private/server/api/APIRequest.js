@@ -21,8 +21,6 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-const Forms = require('./../../../common/Forms.js');
-
 class APIRequest {
   constructor(handler, req, res) {
     this.handler = handler;
@@ -34,14 +32,12 @@ class APIRequest {
   getRequest() {return this.req;}
   getResponse() {return this.res;}
   getHandleFunction() {return this.getHandler().handle;}
-  getFormData(name) {return Forms[name];}
 
   //Some nice shorthands
   getAPI() {return this.getHandler().getAPI();}
   getConfig() {return this.getAPI().getConfig();}
   getServer() {return this.getAPI().getServer();}
   getExpress() {return this.getAPI().getExpress();}
-  getEmail() {return this.getAPI().getEmail();}
   getApp() {return this.getAPI().getApp();}
 
   //Our process method

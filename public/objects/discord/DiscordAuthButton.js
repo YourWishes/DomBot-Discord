@@ -23,32 +23,39 @@
 
 import React from 'react';
 
-import Styles from './Button.scss';
+import fetch from 'cross-fetch';
+import Button from '@objects/button/Button';
 
-export const ButtonGroup = props => {
-  return <div {...props} className={`o-btn-group ${props.className||""}`} />
-};
+export default class DiscordAuthButton extends React.Component {
+  constructor(props) {
+    super(props);
 
-export default props => {
-  let newProps = {...props};
-  let { className, style, children, href, disabled } = props;
-
-  ["style","disabled"].forEach(e => delete newProps[e]);
-
-  style = style || "primary";
-  let clazz = `o-btn is-${style} ${className||""}`;
-
-  let Element = "a";
-  if(!href) {
-    Element = "button";
-    newProps.type = "button";
+    this.state = {
+      auth: null
+    };
   }
 
-  if(disabled) clazz += ` is-disabled`;
+  componentDidMount() {
+    this.updateAuthUrl();
+  }
 
-  return (
-    <Element {...newProps} className={ clazz }>
-      <span className={`o-btn__inner is-${style}`}>{ children }</span>
-    </Element>
-  );
-};
+  componentWillUnmount() {}
+
+  async updateAuthUrl() {
+    console.log('fetching');
+    let x = await fetch('/api/discord/get_auth_url');
+    let url = await x.json();
+    this.setState({ url });
+  }
+
+  render() {
+    let { className } = this.props;
+    let { url } = this.state;
+
+    if(!url) {
+      return <Button disabled {...this.props}>Loading</Button>
+    }
+
+    return <Button {...this.props} href={ url } />;
+  }
+}

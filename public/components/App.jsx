@@ -29,6 +29,7 @@ import Styles from './App.scss';
 import PageBoundary from '@objects/page/boundary/PageBoundary';
 import {Title, SubTitle, Paragraph} from '@objects/typography/Typography';
 import Button, { ButtonGroup } from '@objects/button/Button';
+import DiscordAuthButton from '@objects/discord/DiscordAuthButton';
 import Image from '@objects/image/Image';
 
 import Footer from '@sections/footer/Footer';
@@ -72,9 +73,9 @@ export default props => {
 
             {/* Buttons */}
             <ButtonGroup>
-              <Button style="primary" href="/">
+              <DiscordAuthButton style="primary">
                 Add to Server
-              </Button>
+              </DiscordAuthButton>
 
               <Button style="secondary" href="//discord.gg/rpWyTp">
                 Join the Community

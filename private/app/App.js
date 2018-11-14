@@ -24,17 +24,20 @@
 //Imports
 const
   Configuration = require('./../config/Configuration'),
+  DiscordApp = require('./../discord/DiscordApp'),
   Server = require('./../server/Server')
 ;
 
 class App {
   constructor() {
     this.config = new Configuration(this);
+    this.discord = new DiscordApp(this);
     this.server = new Server(this);
   }
 
   getConfig() { return this.config; }
   getDiscord() { return this.discord; }
+  getServer() { return this.server; }
 
   async init() {
     this.log('Starting App...');
@@ -45,6 +48,16 @@ class App {
       await this.config.loadConfig();
     } catch(e) {
       this.error('Failed to load configuration!');
+      this.error(e);
+      return;
+    }
+
+    //Setup the Discord App.
+    this.log('Connecting to Discord...');
+    try {
+      await this.discord.init();
+    } catch(e) {
+      this.error('Failed to connect to discord!');
       this.error(e);
       return;
     }

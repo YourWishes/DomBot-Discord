@@ -21,34 +21,16 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import React from 'react';
+const APIHandler = require('./../../APIHandler');
 
-import Styles from './Button.scss';
+const TARGET_PERMISSION_LEVEL = 36924672;
 
-export const ButtonGroup = props => {
-  return <div {...props} className={`o-btn-group ${props.className||""}`} />
-};
-
-export default props => {
-  let newProps = {...props};
-  let { className, style, children, href, disabled } = props;
-
-  ["style","disabled"].forEach(e => delete newProps[e]);
-
-  style = style || "primary";
-  let clazz = `o-btn is-${style} ${className||""}`;
-
-  let Element = "a";
-  if(!href) {
-    Element = "button";
-    newProps.type = "button";
+module.exports = class GetAuthUrl extends APIHandler {
+  constructor(api) {
+    super(api, ['GET'], '/discord/get_auth_url');
   }
 
-  if(disabled) clazz += ` is-disabled`;
-
-  return (
-    <Element {...newProps} className={ clazz }>
-      <span className={`o-btn__inner is-${style}`}>{ children }</span>
-    </Element>
-  );
-};
+  async handle(request) {
+    return {ok: true, data: request.getAPI().getApp().getDiscord().getInviteURL(TARGET_PERMISSION_LEVEL) };
+  }
+}
