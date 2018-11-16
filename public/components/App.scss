@@ -21,6 +21,11 @@
     margin: 0 auto;
   }
 
+  &__stats {
+    padding: 1em 0;
+    text-align: center;
+  }
+
   @include t-media-query($s-small-up) {
     &__inner {
       padding: 8em 2em;

@@ -32,6 +32,8 @@ import Button, { ButtonGroup } from '@objects/button/Button';
 import DiscordAuthButton from '@objects/discord/DiscordAuthButton';
 import Image from '@objects/image/Image';
 
+import StatsDisplay from './stats/StatsDisplay';
+
 import Footer from '@sections/footer/Footer';
 import SplitSection, {Split} from '@sections/split/SplitSection';
 
@@ -85,6 +87,8 @@ export default props => {
                 View Source
               </Button>
             </ButtonGroup>
+
+            <StatsDisplay className="c-app__stats" />
           </Split>
         </SplitSection>
 

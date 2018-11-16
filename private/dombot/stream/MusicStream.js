@@ -30,13 +30,23 @@ module.exports = class MusicStream {
   //Nicy handy methods
   getDomBotConnection() {return this.connection;}
   getDiscord() {return this.connection.getDiscord();}
+  getQueuePosition() { return this.connection.queue.indexOf(this); }
+
+  getQueuee() {
+    if(this.requestMessage) return this.requestMessage.member;
+  }
+
+  isPlaying() {return this.playing;}
+
+  //Reasons, sets what requested this stream
+  setRequestMessage(message) {
+    //This specific message caused a connect.
+    this.requestMessage = message;
+  }
 
   //REQUIRED Supers
   getName() {throw new Error("Custom Stream missing getName");}
 
-  isPlaying() {return this.playing;}
-
-  getQueuePosition() { return this.connection.queue.indexOf(this); }
 
   //Now some methods
   async queue() {
@@ -45,19 +55,44 @@ module.exports = class MusicStream {
     //to catch any exceptions.
   }
 
-  unqueue() {
+  async unqueue() {
+    //Always "stop playing"
+    this.playing = false;
+
     //Where am I in the queue?
     let index = this.connection.queue.indexOf(this);
     if(index === -1) return;//Not in the queue?
+
     this.connection.queue.splice(index, 1);//Remove!
+
+    //Force the discord to check the queue
+    await this.connection.checkQueue();
   }
 
   async play() {
     //Called when the queued song is meant to start playing.
   }
 
+  async stop() {
+    if(!this.playing) return;
+    //Before we can unqueue we need to do some little cleanup duties so that
+    //the next stream can start playing.
+    if(this.dispatcher && !this.dispatcher.destroyed) {
+      this.dispatcher.end('Stop Requested');
+    }
+
+    if(this.stream) {
+      this.stream.destroy();
+    }
+
+    //Now we can get the next stream to start playing.
+    this.unqueue();
+  }
+
   //Common event handlers
   useDispatcher(dispatcher) {
+    this.dispatcher = dispatcher;
+
     //Attaches common events to this dispatcher, save some double up for ya'
     dispatcher.on('start', e => this.onSpeakingStart());
     dispatcher.on('speaking', e => this.onSpeaking(e));
@@ -72,24 +107,42 @@ module.exports = class MusicStream {
   }
 
   async onSpeaking(isSpeaking) {
-
+    //Curently not needed.
   }
 
   async onSpeakingError(error) {
-    this.unqueue();
-
-    this.playing = false;
+    this.stop();
+    console.log(`Speaking Error:`);
     console.error(error);
-
-    this.connection.checkQueue();
   }
 
   async onSpeakingEnd(reason) {
-    this.unqueue();
+    this.stop();
+    console.log(`Finished Speaking ${reason}`);
+  }
 
-    this.playing = false;
-    console.log(reason);
+  //
 
-    this.connection.checkQueue();
+  useStream(stream) {
+    this.stream = stream;
+
+    stream.on('close', e => this.onStreamClose());
+    stream.on('end', e => this.onStreamEnd());
+    stream.on('error', e => this.onStreamError(e));
+  }
+
+  onStreamClose() {
+    console.log('Stream Closed');
+  }
+
+  onStreamEnd() {
+    console.log('Stream Ended');
+  }
+
+  onStreamError(e) {
+    this.stop();
+
+    console.log('Stream Error');
+    console.error(e);
   }
 }

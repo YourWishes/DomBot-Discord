@@ -98,11 +98,6 @@ class DiscordApp {
       guild.channels.forEach(channel => {
         if(channel.id != '306635995313340417') return;
         let connection = new DomBotConnection(this);
-        connection.connect(channel).then(async e => {
-          //For testing...
-          let stream = new YoutubeStream(e, 'dQw4w9WgXcQ');
-          await stream.queue();
-        });
       });
     });
   }
