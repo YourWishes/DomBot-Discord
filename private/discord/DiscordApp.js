@@ -25,7 +25,8 @@ const Discord = require('discord.js');
 const fs = require('fs');
 
 const DomBotConnection = require('./../dombot/DomBotConnection');
-const YoutubeStream = require('./../dombot/stream/YoutubeStream');
+const YouTubeStream = require('./../dombot/stream/YouTubeStream');
+const CacheStore = require('./../cache/CacheStore');
 
 const COMMANDS_DIRECTORY = 'commands';
 const COMMAND_PREFIX = "!";
@@ -42,6 +43,9 @@ class DiscordApp {
 
     //Discord Client
     this.client = new Discord.Client();
+
+    //Various caching needs
+    this.store = new CacheStore(app, 60 * 60 * 6); // Set TTL to 6 hours
 
     //Top Level Event Handlers...
     this.client.on('ready', () => this.onReady() );
@@ -105,9 +109,9 @@ class DiscordApp {
   //Complex Gets
   getInviteURL(permissionLevel) {
     let base = 'https://discordapp.com/api/oauth2/authorize?';
-    base += 'client_id=' + encodeURIComponent(this.getConfig().get('discord.client_id')) + '&';
+    base += `client_id=${ encodeURIComponent(this.getConfig().get('discord.client_id')) }&`;
     base += 'scope=bot&';
-    base += 'permissions='+permissionLevel;
+    base += `permissions=${permissionLevel}`;
     return base;
   }
 
@@ -124,6 +128,35 @@ class DiscordApp {
     }
 
     return null;
+  }
+
+  async getSearchResults(query) {
+    return this.store.get(`getSearchResults_${query}`, async e => {
+      //Allows a user to supply a raw string to have the various API's poll and
+      //attempt to find the song for.
+      let results = [];
+
+      //Fetch results from all the various streams
+      let proms = await Promise.all([
+        YouTubeStream.getSearchResults(this, query)
+      ]);
+
+      //Flatten the promise array
+      proms.forEach(r => results = [...results, ...r]);
+
+      //Now sort by match, and setup the create function
+      results.forEach(result => {
+        result.match = result.match || 0;
+        result.create = connection => {
+          //Simply accepts a connection and returns a new isntance of stream
+          return new result.stream(connection, result.param);
+        }
+      });
+
+      //Sort, the higher the match the earlier in the list, 100 should be "perfect"
+      results.sort((a,b) => b.match - a.match);
+      return results;
+    });
   }
 
   //Event Callbacks

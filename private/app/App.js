@@ -25,7 +25,8 @@
 const
   Configuration = require('./../config/Configuration'),
   DiscordApp = require('./../discord/DiscordApp'),
-  Server = require('./../server/Server')
+  Server = require('./../server/Server'),
+  YouTube = require('better-youtube-api')
 ;
 
 class App {
@@ -37,6 +38,7 @@ class App {
 
   getConfig() { return this.config; }
   getDiscord() { return this.discord; }
+  getYouTube() {return this.youtube; }
   getServer() { return this.server; }
 
   async init() {
@@ -48,6 +50,16 @@ class App {
       await this.config.loadConfig();
     } catch(e) {
       this.error('Failed to load configuration!');
+      this.error(e);
+      return;
+    }
+
+    //Connect to YouTube
+    try {
+      if(!this.config.has('youtube.api')) throw new Error("Missing YouTube API Key in config!");
+      this.youtube = new YouTube.YouTube(this.config.get('youtube.api'));
+    } catch(e) {
+      this.error('Failed to connect to YouTube');
       this.error(e);
       return;
     }

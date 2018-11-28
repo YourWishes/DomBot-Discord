@@ -1,4 +1,3 @@
-const YoutubeStream = require('./../../dombot/stream/YoutubeStream');
 const DomBotConnection = require('./../../dombot/DomBotConnection');
 
 module.exports = {

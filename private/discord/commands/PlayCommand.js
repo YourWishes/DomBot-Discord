@@ -1,4 +1,3 @@
-const YoutubeStream = require('./../../dombot/stream/YoutubeStream');
 const DomBotConnection = require('./../../dombot/DomBotConnection');
 
 module.exports = {
@@ -6,11 +5,7 @@ module.exports = {
   aliases: ["pl", "p", "music", "yt", "youtube"],
   command: async function(discord, message, label, args) {
     //Did they give me a url?
-    if(!args.length) return `Please put the YouTube video you want to play.`;
-
-    //Determine the ID
-    let id = YoutubeStream.getIdFromUrl(args[0]);
-    if(!id.length) return 'Please enter a valid Youtube URL';
+    if(!args.length) return `Please put the type the song you want to play.`;
 
     //Is the user in a voice channel?
     let voiceChannel = message.member.voiceChannel;
@@ -24,12 +19,21 @@ module.exports = {
       await connection.connect(voiceChannel);
 
     } else if(connection.channel.id != voiceChannel.id) {
-      //I'm in the guild, but a different channel
-      return `You must be in the same channel as me.`;
+      //Am I playing anything in the channel that I'm in?
+      if(connection.queue.length) {
+          //I'm in the guild, in different channel and playing something.
+          return `I'm busy playing for others right now.`;
+        }
     }
 
+    //Determine the ID
+    let searchResults = await discord.getSearchResults(args.join(' '));
+    if(!searchResults.length) return `Could not find what you were looking for.`;
+
+
     //Everything seems fine, let's attempt to queue the song.
-    let stream = new YoutubeStream(connection, id);
+    let result = searchResults[0];
+    let stream = result.create(connection);
     stream.setRequestMessage(message);
     try {
       await stream.queue();

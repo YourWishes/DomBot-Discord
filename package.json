@@ -33,6 +33,7 @@
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.4",
+    "better-youtube-api": "^0.3.6",
     "body-parser": "^1.18.3",
     "compression-webpack-plugin": "^2.0.0",
     "cross-fetch": "^2.2.3",

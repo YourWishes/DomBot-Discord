@@ -1,4 +1,3 @@
-const YoutubeStream = require('./../../dombot/stream/YoutubeStream');
 const DomBotConnection = require('./../../dombot/DomBotConnection');
 
 module.exports = {
@@ -23,7 +22,7 @@ module.exports = {
     }
 
     //We are playing, build our message
-    let msg = '';
+    let msg = '```';
 
     //Get the currently playing song (first hopefully)
     let hasFirst = false;
@@ -50,6 +49,7 @@ module.exports = {
 
       msg += `\n  #${pIndex} - ${q.getName()}`;
     }
+    msg += '```';
 
     return msg;
   }

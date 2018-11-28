@@ -25,37 +25,34 @@ const MusicStream = require('./MusicStream');
 const ytdl = require('ytdl-core');
 const fs = require('fs');
 const path = require('path');
+const YouTube = require('better-youtube-api/out/util/util');
 
-module.exports = class YoutubeStream extends MusicStream {
-  static getIdFromUrl(id) {
-    id = id || "";
+module.exports = class YouTubeStream extends MusicStream {
+  static getIdFromUrl(url) {
+    url = url || "";
+    let x = YouTube.parseUrl(url);
+    return x ? x.video : null;
+  }
 
-    if(id.startsWith("http") || id.startsWith("www")) {
-      let k = id.replace("https", "").replace("http", "").replace("://", "");
-      if(k.startsWith("youtu.be")) {//Fix youtu.be links
-        //Converts it to be http://youtube.com/watch?v=[id]&t=2 (example, the user may also do a dumb URL)
-        id = "http://youtube.com/watch?v=" + k.replace("youtu.be/", "").replace("?", "&");
-      }
+  static async getSearchResults(discord, query) {
+    //Returns a common format object of valid results from a given query
+    let results = [];
+    let base = { stream: YouTubeStream };
 
-      //Split by query params
-      id = id.split('?');
-      if(id.length > 1) {
-        //Has query params, search array
-        id = id[1];
-        let queryArray = id.split('&');
-        id = "";//default
-        for(let i = 0; i < queryArray.length; i++) {
-          let x = queryArray[i].split('=');
-          if(x[0] != 'v') continue;//IS not v=blah
-          id = x[1];//Set ID
-          break;
-        }
-      } else {
-        id = id[0];
-      }
-    }
+    //First, is this a youtube ID? maybe
+    let id = YouTubeStream.getIdFromUrl(query);
+    if(id) results.push({...base, match: 100, param: id });
 
-    return id.length ? id : null;
+    //Not an id, maybe a search?
+    let search = await discord.getApp().getYouTube().searchVideos(query);
+    search.forEach(e => {
+      if(id && id === e.id) return;
+      let match = query === e.id ? 100 : null;//Matches perfect?
+      //TODO Add imperfect matches
+      results.push({...base, param: e.id, match })
+    });
+
+    return results;
   }
 
 
@@ -64,13 +61,13 @@ module.exports = class YoutubeStream extends MusicStream {
     this.id = youtubeId;
   }
 
-  getYoutubeURL() { return `https://youtube.com/watch?v=${this.id}`; }
+  getYouTubeURL() { return `https://youtube.com/watch?v=${this.id}`; }
   getCacheDir() { return `private/data/cache/youtube`; }
   getCacheFile() { return `${this.getCacheDir()}/${this.id}.mp3`; }
 
   async queue() {
     //Fetch metadata about this video.
-    this.info = await ytdl.getInfo(this.getYoutubeURL(), { filter: 'audioonly' });
+    this.info = await ytdl.getInfo(this.getYouTubeURL(), { filter: 'audioonly' });
 
     //Create each dir
     let dir = this.getCacheDir();
