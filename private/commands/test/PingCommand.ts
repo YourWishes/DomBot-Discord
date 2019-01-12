@@ -21,53 +21,33 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import React from 'react';
+import { Message } from 'discord.js';
+import { DiscordModule, DiscordCommand } from '@yourwishes/app-discord';
 
-import { Paragraph } from '@objects/typography/Typography';
-
-export default class StatsDisplay extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { stats: null };
+export class PingCommand extends DiscordCommand {
+  constructor(module:DiscordModule) {
+    super(module, 'ping', ['pong']);
   }
 
-  componentDidMount() {
-    this.fetchStats();
-  }
+  async onCommand(message:Message) {
+    //Try and delete the original message
+    try {
+      await message.delete();
+    } catch(e) {
 
-  componentWillUnmount() {
-    if(this.fetchTimeout) {
-      clearTimeout(this.fetchTimeout);
-    }
-  }
-
-  async fetchStats() {
-    clearTimeout(this.fetchTimeout);
-
-    //Fetch
-    let x = await fetch('/discord/get_stats');
-    let stats = await x.json();
-
-    this.setState({ stats });
-
-    this.fetchTimeout = setTimeout(() => this.fetchStats(), 3000);
-  }
-
-  render() {
-    let { stats } = this.state;
-
-    let content = "Please Wait...";
-    if(stats) {
-      content = `
-        Currently playing ${stats.songs} songs to ${stats.users} users in
-        ${stats.connections} channels in ${stats.guilds} servers.
-      `;
     }
 
-    return (
-      <Paragraph {...this.props}>
-        { content }
-      </Paragraph>
-    );
+
+    //Now respond to the user with a pong.
+    try {
+      let dmChannel = message.author.dmChannel;
+      if(!dmChannel) dmChannel = await message.author.createDM();
+
+      await dmChannel.send('Pong!');
+    } catch(e) {
+      this.discord.logger.error('Failed to send pong reply!');
+      this.discord.logger.error(e);
+    }
+
   }
-};
+}

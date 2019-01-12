@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es2018",
+    "module": "commonjs",
+    "outDir": "./dist/private",
+    "sourceMap": true,
+    "declaration": true
+  },
+  "files": [
+    "./node_modules/@types/jest/index.d.ts",
+    "./node_modules/@types/node/index.d.ts",
+    "./node_modules/@types/node-cache/index.d.ts",
+    "./node_modules/@types/express/index.d.ts"
+  ],
+  "include": [
+    "private/**/*.ts",
+    "public/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

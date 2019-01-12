@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Dominic Masters
+// Copyright (c) 2019 Dominic Masters
 //
 // MIT License
 //
@@ -21,53 +21,42 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import React from 'react';
+import { DomBotApp } from './../../app/';
+import { APIHandler, APIRequest, APIResponse, RESPONSE_OK } from '@yourwishes/app-server';
 
-import { Paragraph } from '@objects/typography/Typography';
-
-export default class StatsDisplay extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { stats: null };
+export class getStats extends APIHandler {
+  constructor() {
+    super('GET', '/discord/get_stats');
   }
 
-  componentDidMount() {
-    this.fetchStats();
+  async onRequest(request:APIRequest):Promise<APIResponse> {
+    let app = request.server.app as DomBotApp;
+    let { client } = app.discord;
+
+    let songs = 0;
+    let connections = 0;
+    let users = 0;
+
+    app.connections.forEach(connection => {
+      connections++;
+
+      connection.queue.forEach(stream => {
+        if(!stream.isPlaying()) return;
+        songs++;
+      });
+
+      users += (connection.channel.members.size - 1) || 0;
+    });
+
+    //Build our stats object here
+    let stats = {
+      guilds: client.guilds.size,
+      songs,
+      connections,
+      users
+    };
+
+
+    return { code: RESPONSE_OK, data: stats };
   }
-
-  componentWillUnmount() {
-    if(this.fetchTimeout) {
-      clearTimeout(this.fetchTimeout);
-    }
-  }
-
-  async fetchStats() {
-    clearTimeout(this.fetchTimeout);
-
-    //Fetch
-    let x = await fetch('/discord/get_stats');
-    let stats = await x.json();
-
-    this.setState({ stats });
-
-    this.fetchTimeout = setTimeout(() => this.fetchStats(), 3000);
-  }
-
-  render() {
-    let { stats } = this.state;
-
-    let content = "Please Wait...";
-    if(stats) {
-      content = `
-        Currently playing ${stats.songs} songs to ${stats.users} users in
-        ${stats.connections} channels in ${stats.guilds} servers.
-      `;
-    }
-
-    return (
-      <Paragraph {...this.props}>
-        { content }
-      </Paragraph>
-    );
-  }
-};
+}

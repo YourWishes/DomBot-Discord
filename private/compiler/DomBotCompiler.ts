@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Dominic Masters
+// Copyright (c) 2019 Dominic Masters
 //
 // MIT License
 //
@@ -21,53 +21,26 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import React from 'react';
+import * as path from 'path';
+import { WebpackCompiler } from '@yourwishes/app-react';
 
-import { Paragraph } from '@objects/typography/Typography';
+const base = path.resolve(`./public/`);
 
-export default class StatsDisplay extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { stats: null };
+export class DomBotCompiler extends WebpackCompiler {
+  generateConfiguration(isProduction:boolean) {
+    let config = super.generateConfiguration(isProduction);
+    config.resolve = {
+      ...config.resolve,
+      alias: {
+        '@public':  `${base}`,
+        '@objects': `${base}/objects`,
+        '@components': `${base}/components`,
+        '@assets': `${base}/assets/`,
+        '@pages': `${base}/pages`,
+        '@styles': `${base}/styles`,
+        '@sections': `${base}/components/section`
+      }
+    };
+    return config;
   }
-
-  componentDidMount() {
-    this.fetchStats();
-  }
-
-  componentWillUnmount() {
-    if(this.fetchTimeout) {
-      clearTimeout(this.fetchTimeout);
-    }
-  }
-
-  async fetchStats() {
-    clearTimeout(this.fetchTimeout);
-
-    //Fetch
-    let x = await fetch('/discord/get_stats');
-    let stats = await x.json();
-
-    this.setState({ stats });
-
-    this.fetchTimeout = setTimeout(() => this.fetchStats(), 3000);
-  }
-
-  render() {
-    let { stats } = this.state;
-
-    let content = "Please Wait...";
-    if(stats) {
-      content = `
-        Currently playing ${stats.songs} songs to ${stats.users} users in
-        ${stats.connections} channels in ${stats.guilds} servers.
-      `;
-    }
-
-    return (
-      <Paragraph {...this.props}>
-        { content }
-      </Paragraph>
-    );
-  }
-};
+}

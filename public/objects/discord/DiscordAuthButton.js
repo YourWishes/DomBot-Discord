@@ -43,7 +43,7 @@ export default class DiscordAuthButton extends React.Component {
 
   async updateAuthUrl() {
     console.log('fetching');
-    let x = await fetch('/api/discord/get_auth_url');
+    let x = await fetch('/discord/get_auth_url');
     let url = await x.json();
     this.setState({ url });
   }

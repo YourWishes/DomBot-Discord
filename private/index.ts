@@ -21,53 +21,22 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import React from 'react';
+import { DomBotApp } from './app/';
 
-import { Paragraph } from '@objects/typography/Typography';
+//Attempt to make a global "Async Handler" for the app itself
+const app = new DomBotApp();
 
-export default class StatsDisplay extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { stats: null };
-  }
+(async () => {
+  //Initialize the app
+  await app.init();
 
-  componentDidMount() {
-    this.fetchStats();
-  }
+  //Start the main thread
 
-  componentWillUnmount() {
-    if(this.fetchTimeout) {
-      clearTimeout(this.fetchTimeout);
-    }
-  }
+  //End the app
+})().then((e) => {
+  //Should never occur
 
-  async fetchStats() {
-    clearTimeout(this.fetchTimeout);
-
-    //Fetch
-    let x = await fetch('/discord/get_stats');
-    let stats = await x.json();
-
-    this.setState({ stats });
-
-    this.fetchTimeout = setTimeout(() => this.fetchStats(), 3000);
-  }
-
-  render() {
-    let { stats } = this.state;
-
-    let content = "Please Wait...";
-    if(stats) {
-      content = `
-        Currently playing ${stats.songs} songs to ${stats.users} users in
-        ${stats.connections} channels in ${stats.guilds} servers.
-      `;
-    }
-
-    return (
-      <Paragraph {...this.props}>
-        { content }
-      </Paragraph>
-    );
-  }
-};
+}).catch((e) => {
+  //On Error
+  if(e) console.error(e);
+});

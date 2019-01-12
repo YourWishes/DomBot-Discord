@@ -25,7 +25,6 @@ import React from 'react';
 
 import Styles from './App.scss';
 
-
 import PageBoundary from '@objects/page/boundary/PageBoundary';
 import {Title, SubTitle, Paragraph} from '@objects/typography/Typography';
 import Button, { ButtonGroup } from '@objects/button/Button';
