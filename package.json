@@ -1,6 +1,6 @@
 {
   "name": "dombot",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "DomBot Music bot for Discord Servers. Private Discord Music bot.",
   "main": "private/index.js",
   "scripts": {
@@ -32,8 +32,8 @@
     "@types/react-helmet": "^5.0.8",
     "@yourwishes/app-base": "^1.2.0",
     "@yourwishes/app-discord": "^1.0.4",
-    "@yourwishes/app-react": "0.0.7",
-    "@yourwishes/app-server": "^1.0.4",
+    "@yourwishes/app-react": "^0.1.0",
+    "@yourwishes/app-server": "^1.0.5",
     "@yourwishes/app-youtube": "^1.1.0",
     "better-youtube-api": "^0.3.6",
     "cross-fetch": "^3.0.0",
